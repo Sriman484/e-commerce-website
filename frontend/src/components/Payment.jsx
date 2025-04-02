@@ -12,7 +12,7 @@ function Payment() {
   };
 
   const handlePrint = () => {
-    window.print(); // Print the receipt
+    window.print(); 
   };
 
   return (
