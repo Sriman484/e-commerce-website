@@ -23,29 +23,33 @@ function Product({ addToCart, cartItems }) {
 
   return (
     <div className="container mt-5">
-      <h2 className="text-center">Product List</h2>
-      <br />
+      <h2 className="text-center mb-4">Product List</h2>
       <div className="row">
         {products.map((product) => (
-          <div key={product._id} className="col-md-4 mb-3">
-            <div className="card p-3">
+          <div key={product._id} className="col-sm-12 col-md-6 col-lg-4 mb-4">
+            <div className="card p-3 h-100">
               <img
                 src={product.image || "https://via.placeholder.com/150"}
                 alt={product.name}
-                className="img-fluid rounded"
-                style={{ width: "500px", height: "300px", objectFit: "cover" }}
+                className="card-img-top img-fluid rounded"
+                style={{ height: "250px", objectFit: "cover" }}
               />
-              <h4 className="mt-2">{product.name}</h4>
-              <p className="fw-bold">Price: ₹{product.price}</p>
-              <p>{product.description}</p>
-              <button className="btn btn-primary" onClick={() => addToCart(product)}>
-                Add to Cart {getCartQuantity(product._id) > 0 && `(${getCartQuantity(product._id)})`}
-              </button>
+              <div className="card-body">
+                <h5 className="card-title">{product.name}</h5>
+                <p className="card-text fw-bold">Price: ₹{product.price}</p>
+                <p className="card-text">{product.description}</p>
+                <button
+                  className="btn btn-primary w-100"
+                  onClick={() => addToCart(product)}
+                >
+                  Add to Cart{" "}
+                  {getCartQuantity(product._id) > 0 && `(${getCartQuantity(product._id)})`}
+                </button>
+              </div>
             </div>
           </div>
         ))}
       </div>
-      <br /><br />
     </div>
   );
 }

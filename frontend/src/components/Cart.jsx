@@ -11,38 +11,39 @@ function Cart({ cartItems, removeFromCart }) {
 
   return (
     <div className="container mt-5">
-      <h2 className="text-center">Shopping Cart</h2>
-      <br />
+      <h2 className="text-center mb-4">Shopping Cart</h2>
+
       {cartItems.length === 0 ? (
-        <p className="text-center">Your cart is empty.</p>
+        <p className="text-center fs-5">Your cart is empty.</p>
       ) : (
         <>
           <div className="row">
             {cartItems.map((item) => (
-              <div key={item._id} className="col-md-4 mb-3">
-                <div className="card p-3">
+              <div key={item._id} className="col-sm-12 col-md-6 col-lg-4 mb-4">
+                <div className="card h-100 shadow-sm">
                   <img
                     src={item.image || "https://via.placeholder.com/150"}
                     alt={item.name}
-                    className="img-fluid rounded"
+                    className="card-img-top"
                     style={{
-                      width: "500px",
-                      height: "300px",
+                      height: "250px",
                       objectFit: "cover",
                     }}
                   />
-                  <h4 className="mt-2">{item.name}</h4>
-                  <p className="fw-bold">Price: ₹{item.price}</p>
-                  <p>Quantity: {item.quantity}</p>
-                  <p className="fw-bold">
-                    Subtotal: ₹{(item.price * item.quantity).toFixed(2)}
-                  </p>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => removeFromCart(item._id)}
-                  >
-                    Remove One
-                  </button>
+                  <div className="card-body d-flex flex-column">
+                    <h5 className="card-title">{item.name}</h5>
+                    <p className="card-text fw-bold">Price: ₹{item.price}</p>
+                    <p className="card-text">Quantity: {item.quantity}</p>
+                    <p className="card-text fw-bold">
+                      Subtotal: ₹{(item.price * item.quantity).toFixed(2)}
+                    </p>
+                    <button
+                      className="btn btn-danger mt-auto"
+                      onClick={() => removeFromCart(item._id)}
+                    >
+                      Remove One
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -51,7 +52,7 @@ function Cart({ cartItems, removeFromCart }) {
           <div className="text-center mt-4">
             <h3>Total Amount: ₹{totalAmount.toFixed(2)}</h3>
             <button
-              className="btn btn-success mt-2"
+              className="btn btn-success mt-3 px-4 py-2"
               onClick={() => navigate("/payment", { state: { totalAmount } })}
             >
               Proceed to Checkout
@@ -59,9 +60,6 @@ function Cart({ cartItems, removeFromCart }) {
           </div>
         </>
       )}
-      <br />
-      <br />
-      <br />
     </div>
   );
 }
