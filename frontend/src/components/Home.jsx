@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import logo from "../assets/logo.png"
 
 function Home() {
   return (
@@ -7,7 +8,7 @@ function Home() {
       <div className="row align-items-center text-center">
         <div className="col-12 col-md-5 mb-4 mb-md-0">
           <img
-            src="../../public/logo.png"
+            src={logo}
             alt="TrenzZ Logo"
             className="img-fluid"
           />
