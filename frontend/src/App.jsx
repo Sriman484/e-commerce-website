@@ -14,6 +14,7 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
 
   const addToCart = (product) => {
+    alert("Item added to Cart Successfully ✅")
     setCartItems((prevCart) => {
       const existingItem = prevCart.find((item) => item._id === product._id);
       if (existingItem) {
