@@ -7,7 +7,8 @@ import Contact from "./components/Contact";
 import Helpdesk from "./components/HelpDesk";
 import Login from "./components/Login";
 import Cart from "./components/Cart";
-import Payment from "./components/Payment"; 
+import Payment from "./components/Payment"
+import ProductDet from "./components/ProductDet";
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -46,6 +47,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/cart" element={<Cart cartItems={cartItems} removeFromCart={removeFromCart} />} />
         <Route path="/payment" element={<Payment />} />
+        <Route path="/products/:id" element={<ProductDet/>} />
       </Routes>
       <Contact />
     </Router>

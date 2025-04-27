@@ -9,6 +9,21 @@ exports.getItems = async (req, res) => {
   }
 };
 
+exports.getItemById = async (req, res) => {
+  try {
+    const productId = Number(req.params.id);  
+    const product = await Item.findOne({ id: productId }); 
+    if (!product) {
+      console.log("Product not found");  
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json(product);
+  } catch (error) {
+    console.error("Error fetching product:", error);  
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 exports.addItem = async (req, res) => {
   const { name, price } = req.body;
   try {

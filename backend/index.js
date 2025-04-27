@@ -13,6 +13,11 @@ app.use(express.json());
 
 connectDB();
 
+app.use("/api/products", (req, res, next) => {
+    console.log("Route hit:", req.url);
+    next();
+});
+
 app.use("/api/products", productRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
