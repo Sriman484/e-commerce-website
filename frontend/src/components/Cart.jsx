@@ -19,7 +19,7 @@ function Cart({ cartItems, removeFromCart }) {
         <>
           <div className="row">
             {cartItems.map((item) => (
-              <div key={item._id} className="col-sm-12 col-md-6 col-lg-4 mb-4">
+              <div key={item.id} className="col-sm-12 col-md-6 col-lg-4 mb-4">
                 <div className="card h-100 shadow-sm">
                   <img
                     src={item.image || "https://via.placeholder.com/150"}
@@ -39,7 +39,7 @@ function Cart({ cartItems, removeFromCart }) {
                     </p>
                     <button
                       className="btn btn-danger mt-auto"
-                      onClick={() => removeFromCart(item._id)}
+                      onClick={() => removeFromCart(item.id)}
                     >
                       Remove One
                     </button>
@@ -60,6 +60,8 @@ function Cart({ cartItems, removeFromCart }) {
           </div>
         </>
       )}
+      <br />
+      <br />
     </div>
   );
 }

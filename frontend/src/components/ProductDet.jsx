@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
 
-function ProductDet() {
+function ProductDet({ addToCart, cartItems }) {
     const [products, setProducts] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [cartItems, setCartItems] = useState([]); // State to manage cart items
     const { id } = useParams();
+    const navigate = useNavigate();
 
-    // Fetch product details
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/products/" + id);
-                console.log(response.data);
+                const response = await axios.get("https://trenzz.onrender.com/api/products/" + id);
                 setProducts(response.data);
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -26,25 +24,9 @@ function ProductDet() {
         fetchProducts();
     }, [id]);
 
-    // Get cart quantity for a product
     const getCartQuantity = (productId) => {
-        const cartItem = cartItems.find((item) => item._id === productId);
+        const cartItem = cartItems.find((item) => item.id === productId);
         return cartItem ? cartItem.quantity : 0;
-    };
-
-    // Add to Cart function
-    const addToCart = (product) => {
-        const existingItemIndex = cartItems.findIndex((item) => item._id === product._id);
-        if (existingItemIndex > -1) {
-            // Item exists, update quantity
-            const updatedCart = [...cartItems];
-            updatedCart[existingItemIndex].quantity += 1;
-            setCartItems(updatedCart);
-        } else {
-            // New item, add to cart
-            const updatedCart = [...cartItems, { ...product, quantity: 1 }];
-            setCartItems(updatedCart);
-        }
     };
 
     if (loading) {
@@ -76,11 +58,10 @@ function ProductDet() {
                     />
                 </div>
                 <div className="col-md-6">
-                    <h1 className="display-4">{products.name}</h1>
-                    <p className="text-muted">Product ID: {products.id}</p>
-                    <p className="h4 text-success">₹{products.price}</p>
+                    <h1 className="display-4 text-center">{products.name}</h1><br />
+                    <p className="h4 text-center text-secondary">PRICE : ₹{products.price}</p><br />
                     <p className="lead">{products.description}</p>
-
+                    <br /><br />
                     <div className="d-flex justify-content-start">
                         <button
                             className="btn btn-primary flex-fill"
@@ -88,9 +69,6 @@ function ProductDet() {
                         >
                             Add to Cart{" "}
                             {getCartQuantity(products.id) > 0 && `(${getCartQuantity(products.id)})`}
-                        </button>
-                        <button className="btn btn-secondary" style={{ width: '150px' }}>
-                            Buy Now
                         </button>
                     </div>
                 </div>

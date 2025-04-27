@@ -7,19 +7,19 @@ import Contact from "./components/Contact";
 import Helpdesk from "./components/HelpDesk";
 import Login from "./components/Login";
 import Cart from "./components/Cart";
-import Payment from "./components/Payment"
+import Payment from "./components/Payment";
 import ProductDet from "./components/ProductDet";
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
 
   const addToCart = (product) => {
-    alert("Item added to Cart Successfully ✅")
+    alert("Item added to Cart Successfully ✅");
     setCartItems((prevCart) => {
-      const existingItem = prevCart.find((item) => item._id === product._id);
+      const existingItem = prevCart.find((item) => item.id === product.id);
       if (existingItem) {
         return prevCart.map((item) =>
-          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       } else {
         return [...prevCart, { ...product, quantity: 1 }];
@@ -31,7 +31,7 @@ function App() {
     setCartItems((prevCart) =>
       prevCart
         .map((item) =>
-          item._id === id ? { ...item, quantity: item.quantity - 1 } : item
+          item.id === id ? { ...item, quantity: item.quantity - 1 } : item
         )
         .filter((item) => item.quantity > 0)
     );
@@ -42,12 +42,21 @@ function App() {
       <NavBar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/products" element={<Products addToCart={addToCart} cartItems={cartItems} />} />
+        <Route
+          path="/products"
+          element={<Products addToCart={addToCart} cartItems={cartItems} />}
+        />
+        <Route
+          path="/products/:id"
+          element={<ProductDet addToCart={addToCart} cartItems={cartItems} />}
+        />
         <Route path="/help" element={<Helpdesk />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/cart" element={<Cart cartItems={cartItems} removeFromCart={removeFromCart} />} />
+        <Route
+          path="/cart"
+          element={<Cart cartItems={cartItems} removeFromCart={removeFromCart} />}
+        />
         <Route path="/payment" element={<Payment />} />
-        <Route path="/products/:id" element={<ProductDet/>} />
       </Routes>
       <Contact />
     </Router>
