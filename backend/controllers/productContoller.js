@@ -2,8 +2,22 @@ const Item = require("../models/product");
 
 exports.getItems = async (req, res) => {
   try {
-    const items = await Item.find();
-    res.json(items);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const items = await Item.find({}, 'id name price image')
+      .sort({ id: 1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Item.countDocuments(); 
+
+    res.json({
+      items,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    });
   } catch (error) {
     res.status(500).json({ error: "Error fetching items" });
   }
