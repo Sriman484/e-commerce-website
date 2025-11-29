@@ -61,7 +61,7 @@ function ProductDet({ addToCart, cartItems, showToast }) {
         
         if (isInWishlist()) {
             items = items.filter(item => item.id !== products.id);
-            showToast('Removed from wishlist', 'info');
+            showToast('Removed from wishlist', 'success');
         } else {
             items.push(products);
             showToast('Added to wishlist! ❤️', 'success');
@@ -95,12 +95,32 @@ function ProductDet({ addToCart, cartItems, showToast }) {
                             {getCartQuantity(products.id) > 0 && `(${getCartQuantity(products.id)})`}
                         </button>
                         <button
-                            className={`btn ${isInWishlist() ? 'btn-danger' : 'btn-outline-danger'}`}
+                            className="btn"
                             onClick={toggleWishlist}
-                            style={{ minWidth: '50px' }}
+                            style={{ 
+                                minWidth: '50px',
+                                backgroundColor: isInWishlist() ? '#dc3545' : 'transparent',
+                                border: isInWishlist() ? 'none' : '2px solid #dc3545',
+                                borderRadius: '12px',
+                                transition: 'all 0.3s ease',
+                                fontSize: '1.3rem',
+                                boxShadow: isInWishlist() ? '0 4px 12px rgba(220, 53, 69, 0.4)' : 'none'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!isInWishlist()) {
+                                    e.target.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
+                                    e.target.style.transform = 'scale(1.05)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!isInWishlist()) {
+                                    e.target.style.backgroundColor = 'transparent';
+                                    e.target.style.transform = 'scale(1)';
+                                }
+                            }}
                             title={isInWishlist() ? "Remove from wishlist" : "Add to wishlist"}
                         >
-                            {isInWishlist() ? '❤️' : '🤍'}
+                            {isInWishlist() ? '🤍' : '❤️'}
                         </button>
                     </div>
                 </div>

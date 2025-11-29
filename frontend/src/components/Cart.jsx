@@ -13,7 +13,7 @@ function Cart({ cartItems, removeFromCart, showToast }) {
 
   const handleRemove = (id) => {
     removeFromCart(id);
-    showToast('Item removed from cart', 'info');
+    showToast('Item removed from cart', 'success');
   };
 
   return (

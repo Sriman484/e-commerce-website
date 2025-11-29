@@ -116,7 +116,7 @@ function AuthModal({ isOpen, onClose }) {
               <div className="btn-group" role="group">
                 <button
                   type="button"
-                  className={`btn ${isLogin ? "btn-primary" : "btn-outline-primary"}`}
+                  className={`btn ${isLogin ? "btn-primary" : "btn-outline-secondary"}`}
                   onClick={() => {
                     setIsLogin(true);
                     setError("");
@@ -132,7 +132,7 @@ function AuthModal({ isOpen, onClose }) {
                 </button>
                 <button
                   type="button"
-                  className={`btn ${!isLogin ? "btn-primary" : "btn-outline-primary"}`}
+                  className={`btn ${!isLogin ? "btn-primary" : "btn-outline-secondary"}`}
                   onClick={() => {
                     setIsLogin(false);
                     setError("");

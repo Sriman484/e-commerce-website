@@ -12,7 +12,7 @@ function Product({ addToCart, cartItems, showToast }) {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 9;
 
   const navigate = useNavigate();
 
@@ -46,7 +46,6 @@ function Product({ addToCart, cartItems, showToast }) {
       try {
         const typesResponse = await axios.get(`${API_BASE}/api/products/types`);
         typesFromAPI = typesResponse.data.types || [];
-        console.log('✅ Types fetched from API endpoint:', typesFromAPI);
       } catch (typesError) {
         console.log('⚠️ Types endpoint not available:', typesError.message);
       }
@@ -85,7 +84,6 @@ function Product({ addToCart, cartItems, showToast }) {
       if (typesFromAPI.length > 0) {
         // Use types from the database query (most reliable)
         types = typesFromAPI.sort();
-        console.log('✅ Using types from database query:', types);
       } else {
         // Fallback: try to extract from products
         const typesSet = new Set();
@@ -96,14 +94,7 @@ function Product({ addToCart, cartItems, showToast }) {
           }
         });
         types = Array.from(typesSet).sort();
-        console.log('⚠️ Extracted types from products (fallback):', types);
       }
-      
-      console.log('=== PRODUCT FETCH SUMMARY ===');
-      console.log('Total products:', allItems.length);
-      console.log('Product types found:', types);
-      console.log('Types count:', types.length);
-      console.log('==========================');
       
       setProductTypes(types);
       
@@ -145,7 +136,7 @@ function Product({ addToCart, cartItems, showToast }) {
     
     if (isInWishlist(product.id)) {
       items = items.filter(item => item.id !== product.id);
-      showToast('Removed from wishlist', 'info');
+      showToast('Removed from wishlist', 'success');
     } else {
       items.push(product);
       showToast('Added to wishlist! ❤️', 'success');
@@ -256,19 +247,34 @@ function Product({ addToCart, cartItems, showToast }) {
                   className="btn btn-sm position-absolute top-0 end-0 m-2"
                   onClick={() => toggleWishlist(product)}
                   style={{ 
-                    backgroundColor: isInWishlist(product.id) ? 'red' : 'rgba(255,255,255,0.8)',
+                    backgroundColor: isInWishlist(product.id) ? '#dc3545' : 'transparent',
                     borderRadius: '50%',
-                    width: '40px',
-                    height: '40px',
+                    width: '44px',
+                    height: '44px',
                     padding: 0,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    border: 'none'
+                    border: isInWishlist(product.id) ? 'none' : '2px solid #dc3545',
+                    transition: 'all 0.3s ease',
+                    fontSize: '1.3rem',
+                    boxShadow: isInWishlist(product.id) ? '0 4px 12px rgba(220, 53, 69, 0.4)' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isInWishlist(product.id)) {
+                      e.target.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
+                      e.target.style.transform = 'scale(1.1)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isInWishlist(product.id)) {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.transform = 'scale(1)';
+                    }
                   }}
                   title={isInWishlist(product.id) ? "Remove from wishlist" : "Add to wishlist"}
                 >
-                  {isInWishlist(product.id) ? '❤️' : '🤍'}
+                  {isInWishlist(product.id) ? '🤍' : '❤️'}
                 </button>
               </div>
               <div className="card-body d-flex flex-column">

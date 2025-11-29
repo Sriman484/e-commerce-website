@@ -9,9 +9,9 @@ function Toast({ message, type = 'success', onClose, duration = 3000 }) {
     return () => clearTimeout(timer);
   }, [onClose, duration]);
 
-  const bgColor = type === 'success' ? 'bg-success' : 
-                  type === 'error' ? 'bg-danger' : 
-                  type === 'warning' ? 'bg-warning' : 'bg-info';
+  // Only use green (success) and red (error)
+  const isSuccess = type === 'success';
+  const bgColor = isSuccess ? 'bg-success' : 'bg-danger';
 
   return (
     <div 
@@ -25,11 +25,8 @@ function Toast({ message, type = 'success', onClose, duration = 3000 }) {
     >
       <div className="toast-header bg-transparent text-white border-0">
         <strong className="me-auto">
-          {type === 'success' && '✅'}
-          {type === 'error' && '❌'}
-          {type === 'warning' && '⚠️'}
-          {type === 'info' && 'ℹ️'}
-          {' '}{type.charAt(0).toUpperCase() + type.slice(1)}
+          {isSuccess ? '✅' : '❌'}
+          {' '}{isSuccess ? 'Success' : 'Error'}
         </strong>
         <button 
           type="button" 

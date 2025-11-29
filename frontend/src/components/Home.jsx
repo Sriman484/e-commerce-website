@@ -13,7 +13,7 @@ function Home() {
           <img
             src={logo}
             alt="TrenzZ Logo"
-            className="img-fluid"
+            className="img-fluid rounded-3"
           />
         </div>
 
@@ -28,7 +28,7 @@ function Home() {
             wardrobe effortlessly. Shop now at TrenzZ and stay ahead in style
             with the latest fashion trends!
           </p>
-          <Link className="btn btn-success px-4 py-2 fs-5 mt-3" to="/products">
+          <Link className="btn btn-primary px-4 py-2 fs-5 mt-3" to="/products">
             SHOP NOW
           </Link>
         </div>
