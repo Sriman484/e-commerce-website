@@ -39,7 +39,7 @@ function Product({ addToCart, cartItems, showToast }) {
   const fetchAllProducts = async () => {
     setLoading(true);
     try {
-      const API_BASE = 'https://trenzz-backend.vercel.app/';
+      const API_BASE = 'https://trenzz-backend.vercel.app';
       
       // First, try to fetch types directly from the database using the types endpoint
       let typesFromAPI = [];
