@@ -8,7 +8,7 @@ const itemSchema = new mongoose.Schema({
   image: { type: String, required: false },
   description: { type: String, required: false }
 }, {
-  strict: false // Allow fields not defined in schema
+  strict: false
 });
 
 const Item = mongoose.model("Item", itemSchema);

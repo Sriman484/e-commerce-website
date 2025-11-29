@@ -69,7 +69,7 @@ function NavBar({ onOpenAuth, showToast }) {
 
         setSearchLoading(true);
         try {
-            const response = await axios.get(`https://trenzz.onrender.com/api/products?page=1&limit=100`);
+            const response = await axios.get(`https://trenzz-backend.vercel.app/api/products?page=1&limit=100`);
             const allProducts = response.data.items || [];
             const filtered = allProducts.filter(product =>
                 product.name.toLowerCase().includes(query.toLowerCase())

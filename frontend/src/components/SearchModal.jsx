@@ -23,7 +23,7 @@ function SearchModal({ isOpen, onClose }) {
 
     setLoading(true);
     try {
-      const response = await axios.get(`https://trenzz.onrender.com/api/products`);
+      const response = await axios.get(`https://trenzz-backend.vercel.app/api/products`);
       const allProducts = response.data.items || [];
       const filtered = allProducts.filter(product =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase())

@@ -14,7 +14,7 @@ function ProductDet({ addToCart, cartItems, showToast }) {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get("https://trenzz.onrender.com/api/products/" + id);
+                const response = await axios.get("https://trenzz-backend.vercel.app/api/products/" + id);
                 setProducts(response.data);
             } catch (error) {
                 console.error("Error fetching products:", error);
