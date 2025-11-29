@@ -1,26 +1,41 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useDarkMode } from "../contexts/DarkModeContext";
 
-function Cart({ cartItems, removeFromCart }) {
+function Cart({ cartItems, removeFromCart, showToast }) {
   const navigate = useNavigate();
+  const { darkMode } = useDarkMode();
 
   const totalAmount = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
 
+  const handleRemove = (id) => {
+    removeFromCart(id);
+    showToast('Item removed from cart', 'info');
+  };
+
   return (
-    <div className="container mt-5">
+    <div className={`container mt-5 ${darkMode ? 'text-white' : ''}`}>
       <h2 className="text-center mb-4">Shopping Cart</h2>
 
       {cartItems.length === 0 ? (
-        <p className="text-center fs-5">Your cart is empty.</p>
+        <div className="text-center py-5">
+          <p className="fs-5 mb-4">Your cart is empty.</p>
+          <button 
+            className="btn btn-primary"
+            onClick={() => navigate('/products')}
+          >
+            Continue Shopping
+          </button>
+        </div>
       ) : (
         <>
           <div className="row">
             {cartItems.map((item) => (
               <div key={item.id} className="col-sm-12 col-md-6 col-lg-4 mb-4">
-                <div className="card h-100 shadow-sm">
+                <div className={`card h-100 shadow-sm ${darkMode ? 'bg-dark border-secondary' : ''}`}>
                   <img
                     src={item.image || "https://via.placeholder.com/150"}
                     alt={item.name}
@@ -28,7 +43,9 @@ function Cart({ cartItems, removeFromCart }) {
                     style={{
                       height: "250px",
                       objectFit: "cover",
+                      cursor: 'pointer'
                     }}
+                    onClick={() => navigate(`/products/${item.id}`)}
                   />
                   <div className="card-body d-flex flex-column">
                     <h5 className="card-title">{item.name}</h5>
@@ -39,7 +56,7 @@ function Cart({ cartItems, removeFromCart }) {
                     </p>
                     <button
                       className="btn btn-danger mt-auto"
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => handleRemove(item.id)}
                     >
                       Remove One
                     </button>

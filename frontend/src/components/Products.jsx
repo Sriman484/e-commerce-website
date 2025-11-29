@@ -1,42 +1,167 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useDarkMode } from "../contexts/DarkModeContext";
 
-function Product({ addToCart, cartItems }) {
-  const [products, setProducts] = useState([]);
+function Product({ addToCart, cartItems, showToast }) {
+  const { darkMode } = useDarkMode();
+  const [allProducts, setAllProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [productTypes, setProductTypes] = useState([]);
+  const [selectedType, setSelectedType] = useState('all');
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 6;
 
   const navigate = useNavigate();
 
-  const fetchProducts = async (page) => {
+  const applyFilter = (type, productsToFilter) => {
+    const products = productsToFilter || allProducts;
+    let filtered = products;
+    
+    if (type && type !== 'all') {
+      filtered = products.filter(product => {
+        const productType = product.type || product.Type || product.productType || product.product_type;
+        return String(productType).trim() === String(type).trim();
+      });
+    }
+    
+    setFilteredProducts(filtered);
+    setSelectedType(type);
+    setCurrentPage(1); // Reset to first page when filter changes
+    
+    // Calculate total pages for filtered products
+    const total = filtered.length;
+    setTotalPages(Math.ceil(total / itemsPerPage));
+  };
+
+  const fetchAllProducts = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`https://trenzz.onrender.com/api/products?page=${page}&limit=6`);
-      setProducts(response.data.items);
-      setTotalPages(response.data.totalPages);
-      setCurrentPage(response.data.currentPage);
+      const API_BASE = 'https://trenzz.onrender.com';
+      
+      // First, try to fetch types directly from the database using the types endpoint
+      let typesFromAPI = [];
+      try {
+        const typesResponse = await axios.get(`${API_BASE}/api/products/types`);
+        typesFromAPI = typesResponse.data.types || [];
+        console.log('✅ Types fetched from API endpoint:', typesFromAPI);
+      } catch (typesError) {
+        console.log('⚠️ Types endpoint not available:', typesError.message);
+      }
+
+      // Fetch all products
+      let allItems = [];
+      let page = 1;
+      let hasMore = true;
+      const maxPages = 50;
+      
+      while (hasMore && page <= maxPages) {
+        try {
+          const response = await axios.get(`${API_BASE}/api/products?page=${page}&limit=100`);
+          const items = response.data.items || [];
+          
+          if (items.length === 0) {
+            hasMore = false;
+          } else {
+            allItems = [...allItems, ...items];
+            if (page >= response.data.totalPages) {
+              hasMore = false;
+            } else {
+              page++;
+            }
+          }
+        } catch (pageError) {
+          console.error(`Error fetching page ${page}:`, pageError);
+          hasMore = false;
+        }
+      }
+      
+      setAllProducts(allItems);
+      
+      // Use types from API endpoint if available, otherwise try to extract from products
+      let types = [];
+      if (typesFromAPI.length > 0) {
+        // Use types from the database query (most reliable)
+        types = typesFromAPI.sort();
+        console.log('✅ Using types from database query:', types);
+      } else {
+        // Fallback: try to extract from products
+        const typesSet = new Set();
+        allItems.forEach(item => {
+          const productType = item.type || item.Type || item.productType || item.product_type;
+          if (productType && productType.trim() !== '') {
+            typesSet.add(String(productType).trim());
+          }
+        });
+        types = Array.from(typesSet).sort();
+        console.log('⚠️ Extracted types from products (fallback):', types);
+      }
+      
+      console.log('=== PRODUCT FETCH SUMMARY ===');
+      console.log('Total products:', allItems.length);
+      console.log('Product types found:', types);
+      console.log('Types count:', types.length);
+      console.log('==========================');
+      
+      setProductTypes(types);
+      
+      // Apply initial filter
+      applyFilter('all', allItems);
     } catch (error) {
       console.error("Error fetching products:", error);
+      console.error("Error details:", error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProducts(currentPage);
-  }, [currentPage]);
+    fetchAllProducts();
+  }, []);
+
+  // Get products for current page
+  const getPaginatedProducts = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
+  };
 
   const getCartQuantity = (productId) => {
     const cartItem = cartItems.find((item) => item.id === productId);
     return cartItem ? cartItem.quantity : 0;
   };
 
+  const isInWishlist = (productId) => {
+    const wishlist = localStorage.getItem('wishlist');
+    if (!wishlist) return false;
+    return JSON.parse(wishlist).some(item => item.id === productId);
+  };
+
+  const toggleWishlist = (product) => {
+    const wishlist = localStorage.getItem('wishlist');
+    let items = wishlist ? JSON.parse(wishlist) : [];
+    
+    if (isInWishlist(product.id)) {
+      items = items.filter(item => item.id !== product.id);
+      showToast('Removed from wishlist', 'info');
+    } else {
+      items.push(product);
+      showToast('Added to wishlist! ❤️', 'success');
+    }
+    
+    localStorage.setItem('wishlist', JSON.stringify(items));
+  };
+
   const handlePageChange = (pageNum) => {
     if (pageNum >= 1 && pageNum <= totalPages) {
       setCurrentPage(pageNum);
     }
+  };
+
+  const handleTypeFilter = (type) => {
+    applyFilter(type, allProducts);
   };
 
   if (loading) {
@@ -49,24 +174,108 @@ function Product({ addToCart, cartItems }) {
     );
   }
 
+  const displayProducts = getPaginatedProducts();
+
   return (
-    <div className="container py-5">
-      <h2 className="text-center mb-5">Product List</h2>
-      <div className="row g-4">
-        {products.map((product) => (
+    <div className={`container py-5 ${darkMode ? 'text-white' : ''}`}>
+      <h2 className="text-center mb-4">Product List</h2>
+      
+      {/* Filter Buttons */}
+      <div className="mb-4">
+        <div className="d-flex flex-wrap justify-content-center gap-2">
+          <button
+            className={`btn ${selectedType === 'all' ? 'btn-primary' : darkMode ? 'btn-outline-light' : 'btn-outline-secondary'}`}
+            onClick={() => handleTypeFilter('all')}
+            style={{ borderRadius: '20px', minWidth: '80px' }}
+          >
+            All ({allProducts.length})
+          </button>
+          {productTypes && productTypes.length > 0 ? (
+            productTypes.map((type) => {
+              const count = allProducts.filter(p => {
+                const productType = p.type || p.Type || p.productType || p.product_type;
+                return String(productType).trim() === String(type).trim();
+              }).length;
+              
+              return (
+                <button
+                  key={type}
+                  className={`btn ${selectedType === type ? 'btn-primary' : darkMode ? 'btn-outline-light' : 'btn-outline-secondary'}`}
+                  onClick={() => handleTypeFilter(type)}
+                  style={{ borderRadius: '20px', minWidth: '80px' }}
+                >
+                  {String(type)} ({count})
+                </button>
+              );
+            })
+          ) : (
+            <div className="w-100 text-center mt-2">
+              <small className={`${darkMode ? 'text-light' : 'text-muted'}`}>
+                No product types found. Found {allProducts.length} products. 
+                {allProducts.length > 0 && (
+                  <span> First product type: {allProducts[0]?.type || 'undefined'}</span>
+                )}
+              </small>
+            </div>
+          )}
+        </div>
+        {selectedType !== 'all' && (
+          <div className="text-center mt-3">
+            <p className={`${darkMode ? 'text-light' : 'text-muted'} mb-0`}>
+              Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} of type: <strong>{selectedType}</strong>
+            </p>
+          </div>
+        )}
+      </div>
+
+      {displayProducts.length === 0 ? (
+        <div className="text-center py-5">
+          <p className="fs-5">No products found in this category.</p>
+          <button 
+            className="btn btn-primary mt-3"
+            onClick={() => handleTypeFilter('all')}
+          >
+            View All Products
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="row g-4">
+            {displayProducts.map((product) => (
           <div key={product.id} className="col-sm-12 col-md-6 col-lg-4">
-            <div className="card h-100 shadow-sm">
-              <img
-                src={product.image || "https://via.placeholder.com/150"}
-                alt={product.name}
-                className="card-img-top"
-                style={{ height: "350px", objectFit: "cover", borderTopLeftRadius: "0.5rem", borderTopRightRadius: "0.5rem" }}
-              />
+            <div className={`card h-100 shadow-sm ${darkMode ? 'bg-dark border-secondary' : ''}`} style={{ transition: 'transform 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+              <div className="position-relative">
+                <img
+                  src={product.image || "https://via.placeholder.com/150"}
+                  alt={product.name}
+                  className="card-img-top"
+                  style={{ height: "350px", objectFit: "cover", borderTopLeftRadius: "0.5rem", borderTopRightRadius: "0.5rem", cursor: 'pointer' }}
+                  onClick={() => navigate(`/products/${product.id}`)}
+                />
+                <button
+                  className="btn btn-sm position-absolute top-0 end-0 m-2"
+                  onClick={() => toggleWishlist(product)}
+                  style={{ 
+                    backgroundColor: isInWishlist(product.id) ? 'red' : 'rgba(255,255,255,0.8)',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: 'none'
+                  }}
+                  title={isInWishlist(product.id) ? "Remove from wishlist" : "Add to wishlist"}
+                >
+                  {isInWishlist(product.id) ? '❤️' : '🤍'}
+                </button>
+              </div>
               <div className="card-body d-flex flex-column">
                 <h5 className="card-title text-center">{product.name}</h5>
                 <p className="card-text fw-bold mb-2 text-center">Price: ₹{product.price}</p>
                 <div className="mt-auto d-flex justify-content-between gap-2">
-                  <button className="btn btn-outline-secondary flex-fill" onClick={() => navigate(`/products/${product.id}`)}>
+                  <button className={`btn ${darkMode ? 'btn-outline-light' : 'btn-outline-secondary'} flex-fill`} onClick={() => navigate(`/products/${product.id}`)}>
                     View Details
                   </button>
                   <button className="btn btn-primary flex-fill" onClick={() => addToCart(product)}>
@@ -78,27 +287,32 @@ function Product({ addToCart, cartItems }) {
             </div>
           </div>
         ))}
-      </div>
+          </div>
 
-      <div className="d-flex justify-content-center mt-5">
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="d-flex justify-content-center mt-5">
         <nav>
-          <ul className="pagination">
+          <ul className={`pagination ${darkMode ? 'pagination-dark' : ''}`}>
             <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-              <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>Previous</button>
+              <button className={`page-link ${darkMode ? 'bg-dark text-white border-secondary' : ''}`} onClick={() => handlePageChange(currentPage - 1)}>Previous</button>
             </li>
             {[...Array(totalPages)].map((_, index) => (
               <li key={index} className={`page-item ${currentPage === index + 1 ? "active" : ""}`}>
-                <button className="page-link" onClick={() => handlePageChange(index + 1)}>
+                <button className={`page-link ${darkMode ? 'bg-dark text-white border-secondary' : ''}`} onClick={() => handlePageChange(index + 1)}>
                   {index + 1}
                 </button>
               </li>
             ))}
             <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-              <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>Next</button>
+              <button className={`page-link ${darkMode ? 'bg-dark text-white border-secondary' : ''}`} onClick={() => handlePageChange(currentPage + 1)}>Next</button>
             </li>
           </ul>
         </nav>
-      </div>
+          </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

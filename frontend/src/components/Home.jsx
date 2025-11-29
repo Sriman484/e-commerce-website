@@ -1,10 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useDarkMode } from "../contexts/DarkModeContext";
 import logo from "../assets/logo.png"
 
 function Home() {
+  const { darkMode } = useDarkMode();
+  
   return (
-    <div className="container d-flex justify-content-center align-items-center min-vh-100 home">
+    <div className={`container d-flex justify-content-center align-items-center min-vh-100 home ${darkMode ? 'text-white' : ''}`}>
       <div className="row align-items-center text-center">
         <div className="col-12 col-md-5 mb-4 mb-md-0">
           <img

@@ -5,13 +5,29 @@ exports.getItems = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+    const type = req.query.type;
 
-    const items = await Item.find({}, 'id name price image')
+    // Build query object
+    const query = {};
+    if (type && type !== 'all') {
+      query.type = type;
+    }
+
+    // Use lean() to get plain JavaScript objects with all fields including type
+    const items = await Item.find(query)
+      .lean() // Returns plain JS objects instead of Mongoose documents
       .sort({ id: 1 })
       .skip(skip)
       .limit(limit);
+    
+    // Log to verify type field is present
+    if (items.length > 0) {
+      console.log('Sample item from DB (raw):', items[0]);
+      console.log('Sample item type:', items[0].type);
+      console.log('All keys:', Object.keys(items[0]));
+    }
 
-    const total = await Item.countDocuments(); 
+    const total = await Item.countDocuments(query); 
 
     res.json({
       items,
@@ -20,6 +36,15 @@ exports.getItems = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: "Error fetching items" });
+  }
+};
+
+exports.getProductTypes = async (req, res) => {
+  try {
+    const types = await Item.distinct('type');
+    res.json({ types: types.filter(type => type != null) });
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching product types" });
   }
 };
 

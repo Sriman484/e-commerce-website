@@ -1,8 +1,11 @@
 import React from 'react';
+import { useDarkMode } from '../contexts/DarkModeContext';
 
 function Footer() {
+    const { darkMode } = useDarkMode();
+    
     return (
-        <div className="bg-black text-white p-5">
+        <div className={`${darkMode ? 'bg-dark' : 'bg-black'} text-white p-5`}>
             <div className="container">
                 <div className="row">
                     <div className="col-md-4">
